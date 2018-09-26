@@ -1,34 +1,41 @@
 from collections import defaultdict
 
-
-class SolutionDFS(object):
-    def findRedundantConnection(self, edges):
+class Solution(object):
+    def findRedundantDirectedConnection(self, edges):
         """
         :type edges: List[List[int]]
         :rtype: List[int]
         """
-        graph = defaultdict(list)
-        vertices = set()
+        self.v1 = 0
+        self.v2 = 0
+        def find_redun_edge(u, parent):
+            if colors_dict[u] == 0:
+                colors_dict[u] = 1
+                parents_dict[u] = parent
+                for v in graph[u]:
+                    find_redun_edge(v, u)
+                colors_dict[u] = 2
+            elif colors_dict[u] == 1:
+                self.v1, self.v2 = parent, u
+            else:
+                self.v1, self.v2 = parents_dict[u], u
 
-        def dfs(node, target, visited):
-            if not visited[node - 1]:
-                visited[node - 1] = True
-                if node == target:
-                    return True
-                return any(dfs(n, target, visited) for n in graph[node])
+        graph = defaultdict(list)
+        colors_dict = dict()
+        parents_dict = dict()
 
         for u, v in edges:
-            vertices.add(u)
-            vertices.add(v)
-            if u in vertices and v in vertices:
-                if dfs(u, v, [False] * len(edges)) or dfs(v, u, [False] * len(edges)):
-                    return u, v
             graph[u].append(v)
+            colors_dict[u] = 0
+            colors_dict[v] = 0
+
+        find_redun_edge(edges[0][0], None)
+        return [self.v1, self.v2]
 
 
 def main():
     edges = [[1,2], [1,3], [2,3]]
-    print SolutionDFS().findRedundantConnection(edges)
+    print Solution().findRedundantDirectedConnection(edges)
 
 
 if __name__ == "__main__":
